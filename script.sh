@@ -38,7 +38,6 @@ function realizar_peticion { python3 -c "
 import requests
 import sys
 url = 'http://${AUTH}${WEB}hostname=${HOST}&ip=${IP}'
-print(url)
 r = requests.get(url)
 if r.status_code != 200:
     print('Error al realizar la peticion! Saliendo...')
