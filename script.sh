@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# -- Variables globales -- #
+# ------------------ Variables globales ------------------ #
 
 USUARIO="" #email
 PASS=""
@@ -8,7 +8,7 @@ HOST=""
 IP=""
 WEB="@dynupdate.no-ip.com/nic/update?"
 
-# -- Metodos -- #
+# ------------------ Metodos ------------------ #
 
 function recoger_args
 {
@@ -47,7 +47,7 @@ else:
 ";
 }
 
-# -- ToDo -- #
+# ------------------ ToDo ------------------ #
 
 recoger_args
 obtener_ip
