@@ -1,36 +1,52 @@
 #!/bin/bash
 
-# ------------------ Variables globales ------------------ #
+# ------------------------- Variables globales ----------------------- #
 
-USUARIO="" #email
+USUARIO="" # email!!
 PASS=""
-HOST=""
-IP=""
-WEB="@dynupdate.no-ip.com/nic/update?"
+HOST="" # nombre del dominio que queremos actualizar
+IP="" # direccion IP la cual el dominio nos referenciara
+URL_REQUEST="" # url sobre la que realizaremos la peticion
 
-# ------------------ Metodos ------------------ #
+WEB="https://dynupdate.no-ip.com/nic/update?"
+USERAGENT="--user-agent 'no-ip shell script/1.0 mail@mail.com'" #atributo para cURL
 
-function recoger_args
+# ---------------------------- Metodos ------------------------------ #
+
+function obtener_credenciales
 {
+    
+    # Nota : para hacerlo automatico (uso con cron) borrar el condicional 
+    #         y poner los valores concretos directamente justo debajo
+    
     if [ $@ -ne 4 ]; then     # si no tenemos los argumentos necesarios salimos
-        echo "ERROR! Uso: ./script.sh '<usuario>' '<password>' '<host>'"
+        echo "ERROR!! Uso: ./script.sh '<usuario>' '<password>' '<host_para_actualizar>'"
         exit -1
     fi
 
-    USUARIO="${USUARIO}$1" 
-    PASS="${PASS}$2"
-    HOST="${HOST}$3"
+    USUARIO="$1" 
+    PASS="$2"
+
+    # Ciframos las credenciales
+    BASE64_PASS=$(echo "$USUARIO:$PASS" | base64)
+    AUTH_HEADERS="\"Authorization: Basic ${BASE64_PASS}"\" #parametro para cURL
+
 }
 
-function obtener_ip
+function obtener_datos_host-ip
 {
-    IP=$(wget -qO- "http://myexternalip.com/raw") #obtencion de IP publica
+    HOST="hostname=$3"
+    
+    IP=$(wget -qO- "http://myexternalip.com/raw") # obtencion de IP publica
 
-    if [ $IP -eqz ]; #error al obtener IP
+    if [ $IP -eqz ]; # error al obtener IP
     then
         echo "NO se ha podido obtener la IP! Saliendo ..."
         exit -1
     fi
+
+    # Actualizamos los datos de la URL
+    URL_REQUEST="${WEB}${HOST}&ip=${IP}"
 }
 
 function realizar_peticion { python3 -c "
@@ -49,20 +65,19 @@ else:
 
 function realizar_peticion_bash { 
 
-    RES=$(curl -k -u "http://${AUTH}${WEB}hostname=${HOST}&ip=${IP}")
+    CMD=$(curl -X GET ${URL_REQUEST} -H ${AUTH_HEADERS})
 
-    if [ $RES -ne 200 ];
-    then
-        echo "Problema al actualizar"
+    # Comprobacion de errores
+    RESULT=$(eval ${CMD})
+
+	if [ -z "$RESULT" ] && [ $? -ne 0 ]
+        echo "Problema al actualizar el host"
     fi
 }
 
-# ------------------ ToDo ------------------ #
+# -------------------------------- ToDo -------------------------------- #
 
 recoger_args
 obtener_ip
 realizar_peticion
 # realizar_peticion_bash
-
-
-
