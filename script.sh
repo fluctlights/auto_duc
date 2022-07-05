@@ -47,11 +47,22 @@ else:
 ";
 }
 
+function realizar_peticion_bash { 
+
+    RES=$(curl -k -u "http://${AUTH}${WEB}hostname=${HOST}&ip=${IP}")
+
+    if [ $RES -ne 200 ];
+    then
+        echo "Problema al actualizar"
+    fi
+}
+
 # ------------------ ToDo ------------------ #
 
 recoger_args
 obtener_ip
 realizar_peticion
+# realizar_peticion_bash
 
 
 
